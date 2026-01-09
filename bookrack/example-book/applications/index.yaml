@@ -1,0 +1,18 @@
+# Applications Chapter
+# Contains user-facing applications and services
+
+name: applications
+
+# Chapter-level appendix
+appendix:
+  tier: application
+  priority: normal
+
+# Chapter-level sync policy
+appParams:
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

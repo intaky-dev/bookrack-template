@@ -1,0 +1,83 @@
+# Example: Application with Istio service mesh integration
+# Shows VirtualService, DestinationRule, and certificate management
+
+name: app-with-istio
+
+image:
+  name: frontend-app
+  tag: v1.0.0
+  pullPolicy: IfNotPresent
+
+replicas: 3
+
+ports:
+  - name: http
+    containerPort: 3000
+    protocol: TCP
+
+service:
+  enabled: true
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+
+# Istio VirtualService configuration
+istio:
+  frontend-vs:
+    # Query lexicon for gateway with label "access: external"
+    selector:
+      access: external
+      default: book
+    hosts:
+      - frontend.example.com
+    routes:
+      - destination:
+          host: frontend-app
+          port: 80
+        weight: 100
+    # Optional: HTTP route matching and rewrites
+    # match:
+    #   - uri:
+    #       prefix: /api
+    # rewrite:
+    #   uri: /
+
+  # DestinationRule for traffic policies
+  frontend-dr:
+    host: frontend-app
+    trafficPolicy:
+      connectionPool:
+        tcp:
+          maxConnections: 100
+        http:
+          http1MaxPendingRequests: 50
+          maxRequestsPerConnection: 2
+      loadBalancer:
+        simple: LEAST_REQUEST
+
+# cert-manager certificate integration
+certManager:
+  frontend-cert:
+    dnsNames:
+      - frontend.example.com
+      - www.frontend.example.com
+    # Query lexicon for issuer with label "default: book"
+    selector:
+      default: book
+    # Optional: specify issuer directly
+    # issuer: letsencrypt-prod
+
+# Health checks
+livenessProbe:
+  enabled: true
+  httpGet:
+    path: /healthz
+    port: http
+
+readinessProbe:
+  enabled: true
+  httpGet:
+    path: /ready
+    port: http

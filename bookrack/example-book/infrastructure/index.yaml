@@ -1,0 +1,19 @@
+# Infrastructure Chapter
+# Contains foundational services that applications depend on
+
+name: infrastructure
+
+# Chapter-level appendix that extends the book appendix
+appendix:
+  # Add infrastructure-specific configuration here
+  tier: infrastructure
+  priority: high
+
+# Chapter-level sync policy
+appParams:
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

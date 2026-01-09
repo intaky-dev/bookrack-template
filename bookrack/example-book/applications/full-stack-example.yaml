@@ -1,0 +1,350 @@
+# Example: Full-stack application with all features
+# Demonstrates comprehensive spell configuration with multiple integrations
+
+name: full-stack-app
+
+# Container configuration
+image:
+  name: my-company/full-stack-app
+  tag: v2.1.0
+  pullPolicy: IfNotPresent
+  # Optional: private registry credentials
+  # pullSecrets:
+  #   - name: registry-credentials
+
+# Scaling configuration
+replicas: 3
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+# Resource management
+resources:
+  requests:
+    cpu: 500m
+    memory: 512Mi
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+
+# Container ports
+ports:
+  - name: http
+    containerPort: 8080
+    protocol: TCP
+  - name: metrics
+    containerPort: 9090
+    protocol: TCP
+
+# Kubernetes Service
+service:
+  enabled: true
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+    - name: metrics
+      port: 9090
+      targetPort: metrics
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9090"
+    prometheus.io/path: "/metrics"
+
+# Environment variables
+env:
+  - name: APP_ENV
+    value: "production"
+  - name: LOG_LEVEL
+    value: "info"
+  - name: PORT
+    value: "8080"
+  # Secret references
+  - name: DATABASE_URL
+    valueFrom:
+      secretKeyRef:
+        name: app-database
+        key: connection_string
+  - name: REDIS_URL
+    valueFrom:
+      secretKeyRef:
+        name: app-redis
+        key: connection_string
+  - name: API_KEY
+    valueFrom:
+      secretKeyRef:
+        name: app-secrets
+        key: api_key
+
+# ConfigMaps
+configMaps:
+  app-config:
+    data:
+      config.yaml: |
+        server:
+          host: 0.0.0.0
+          port: 8080
+        database:
+          pool_size: 10
+          timeout: 30s
+        cache:
+          ttl: 300
+        features:
+          new_ui: true
+          beta_api: false
+
+# Volume mounts
+volumeMounts:
+  - name: config
+    mountPath: /app/config
+  - name: cache
+    mountPath: /tmp/cache
+
+volumes:
+  - name: config
+    configMap:
+      name: app-config
+  - name: cache
+    emptyDir: {}
+
+# Health checks
+livenessProbe:
+  enabled: true
+  httpGet:
+    path: /health/live
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  enabled: true
+  httpGet:
+    path: /health/ready
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+# Startup probe (for slow-starting apps)
+startupProbe:
+  enabled: true
+  httpGet:
+    path: /health/startup
+    port: http
+  initialDelaySeconds: 0
+  periodSeconds: 5
+  failureThreshold: 30
+
+# Security context
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: true
+
+# Pod annotations
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "9090"
+  vault.hashicorp.com/agent-inject: "true"
+
+# Pod labels
+podLabels:
+  app.kubernetes.io/component: backend
+  app.kubernetes.io/part-of: full-stack
+  tier: application
+
+# Affinity and topology
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - full-stack-app
+          topologyKey: kubernetes.io/hostname
+
+# Vault integration for secrets
+vault:
+  app-database:
+    path: secret/data/production/database
+    outputType: secret
+    keys:
+      - connection_string
+      - username
+      - password
+
+  app-redis:
+    path: secret/data/production/redis
+    outputType: secret
+    keys:
+      - connection_string
+      - password
+
+  app-secrets:
+    path: secret/data/production/app
+    outputType: secret
+    keys:
+      - api_key
+      - jwt_secret
+      - encryption_key
+
+# Istio service mesh integration
+istio:
+  # VirtualService for external access
+  app-vs:
+    selector:
+      access: external
+      default: book
+    hosts:
+      - app.example.com
+      - api.example.com
+    routes:
+      - match:
+          - uri:
+              prefix: /api
+        route:
+          - destination:
+              host: full-stack-app
+              port: 80
+        headers:
+          request:
+            add:
+              x-api-version: v2
+      - route:
+          - destination:
+              host: full-stack-app
+              port: 80
+
+  # DestinationRule for traffic policies
+  app-dr:
+    host: full-stack-app
+    trafficPolicy:
+      connectionPool:
+        tcp:
+          maxConnections: 100
+        http:
+          http1MaxPendingRequests: 50
+          http2MaxRequests: 100
+          maxRequestsPerConnection: 2
+      loadBalancer:
+        simple: LEAST_REQUEST
+      outlierDetection:
+        consecutiveErrors: 5
+        interval: 30s
+        baseEjectionTime: 30s
+        maxEjectionPercent: 50
+
+  # PeerAuthentication for mTLS
+  app-pa:
+    mode: STRICT
+
+# cert-manager integration for TLS
+certManager:
+  app-cert:
+    dnsNames:
+      - app.example.com
+      - api.example.com
+    selector:
+      default: book
+    # Optional: additional certificate configuration
+    duration: 2160h  # 90 days
+    renewBefore: 360h  # 15 days before expiry
+
+# ServiceMonitor for Prometheus
+monitoring:
+  serviceMonitor:
+    enabled: true
+    interval: 30s
+    scrapeTimeout: 10s
+    path: /metrics
+    labels:
+      prometheus: kube-prometheus
+
+# Network Policy
+networkPolicy:
+  enabled: true
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: istio-system
+        - podSelector:
+            matchLabels:
+              app: frontend
+      ports:
+        - protocol: TCP
+          port: 8080
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: default
+      ports:
+        - protocol: TCP
+          port: 5432  # PostgreSQL
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 6379  # Redis
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 53  # DNS
+          protocol: UDP
+          port: 53
+
+# Init containers
+initContainers:
+  - name: migration
+    image: my-company/full-stack-app:v2.1.0
+    command: ["./migrate.sh"]
+    env:
+      - name: DATABASE_URL
+        valueFrom:
+          secretKeyRef:
+            name: app-database
+            key: connection_string
+
+# Sidecar containers
+sidecars:
+  - name: log-aggregator
+    image: fluent/fluent-bit:2.0
+    volumeMounts:
+      - name: logs
+        mountPath: /var/log/app
+
+# Custom ArgoCD sync options
+appParams:
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - RespectIgnoreDifferences=true
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/replicas  # Ignore replica count changes (HPA manages this)

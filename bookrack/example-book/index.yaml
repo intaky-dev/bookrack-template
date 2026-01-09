@@ -1,0 +1,72 @@
+# Book configuration file
+# This defines a "book" which is a collection of related applications organized in chapters
+
+name: example-book
+
+# Chapters define logical groupings of applications
+# They are processed in order, so infrastructure should come before applications
+chapters:
+  - infrastructure
+  - applications
+
+# Default trinket (chart) used for all spells unless overridden
+# This is typically the summon chart which handles workload deployment
+defaultTrinket:
+  repository: https://github.com/kast-spells/kast-system.git
+  path: ./charts/summon
+  targetRevision: main
+
+# Additional trinkets that can be referenced by spells
+# These provide additional functionality like secrets, service mesh, certificates
+trinkets:
+  kaster-vault:
+    key: vault
+    repository: https://github.com/kast-spells/kast-system.git
+    path: ./charts/kaster
+    targetRevision: main
+
+  kaster-istio:
+    key: istio
+    repository: https://github.com/kast-spells/kast-system.git
+    path: ./charts/kaster
+    targetRevision: main
+
+  kaster-cert-manager:
+    key: certManager
+    repository: https://github.com/kast-spells/kast-system.git
+    path: ./charts/kaster
+    targetRevision: main
+
+# Appendix: Global configuration propagated to all chapters and spells
+appendix:
+  # Cluster-level configuration
+  cluster:
+    name: my-cluster
+    environment: dev
+    region: us-west-2
+
+  # Lexicon: Infrastructure registry with label-based discovery
+  # Other spells can query this to find infrastructure components
+  lexicon:
+    # Example: External gateway for ingress
+    # - name: external-gateway
+    #   type: istio-gw
+    #   labels:
+    #     access: external
+    #     default: book
+    #   gateway: istio-system/external-gateway
+
+    # Example: Certificate issuer
+    # - name: letsencrypt-prod
+    #   type: cert-issuer
+    #   labels:
+    #     default: book
+    #   issuer: letsencrypt-prod
+
+    # Example: Vault server
+    # - name: vault-prod
+    #   type: vault
+    #   labels:
+    #     default: book
+    #   address: https://vault.vault.svc:8200
+    #   role: my-app-role

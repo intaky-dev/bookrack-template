@@ -1,0 +1,93 @@
+name: Validate Bookrack Structure
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - develop
+  pull_request:
+    branches:
+      - main
+      - master
+      - develop
+
+jobs:
+  validate:
+    name: Validate YAML and Structure
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install yamllint
+        run: pip install yamllint
+
+      - name: Validate YAML syntax
+        run: |
+          find bookrack/ -name "*.yaml" -o -name "*.yml" | while read file; do
+            echo "Validating $file..."
+            yamllint -d "{extends: default, rules: {line-length: {max: 120}}}" "$file" || exit 1
+          done
+
+      - name: Check bookrack structure
+        run: |
+          echo "Checking bookrack structure..."
+
+          # Check that bookrack directory exists
+          if [ ! -d "bookrack" ]; then
+            echo "Error: bookrack directory not found"
+            exit 1
+          fi
+
+          # Check each book has an index.yaml
+          for book in bookrack/*/; do
+            if [ ! -f "${book}index.yaml" ]; then
+              echo "Error: Missing index.yaml in ${book}"
+              exit 1
+            fi
+            echo "✓ ${book} has valid structure"
+          done
+
+          echo "✓ All books have valid structure"
+
+      - name: Check required fields in book index
+        run: |
+          echo "Validating book index files..."
+
+          for book in bookrack/*/index.yaml; do
+            echo "Checking $book..."
+
+            # Check for required fields
+            if ! grep -q "^name:" "$book"; then
+              echo "Error: Missing 'name' field in $book"
+              exit 1
+            fi
+
+            if ! grep -q "^chapters:" "$book"; then
+              echo "Error: Missing 'chapters' field in $book"
+              exit 1
+            fi
+
+            echo "✓ $book has required fields"
+          done
+
+      - name: Summary
+        if: success()
+        run: |
+          echo "════════════════════════════════════════"
+          echo "✓ All validations passed!"
+          echo "════════════════════════════════════════"
+          echo ""
+          echo "Books validated:"
+          find bookrack/ -name "index.yaml" -type f | sed 's|bookrack/||;s|/index.yaml||'
+          echo ""
+          echo "Spells found:"
+          find bookrack/ -name "*.yaml" -type f ! -name "index.yaml" | wc -l
