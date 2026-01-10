@@ -2,3 +2,6 @@
 	path = vendor/kast-system
 	url = https://github.com/kast-spells/kast-system.git
 	branch = main
+[submodule "librarian"]
+	path = librarian
+	url = https://github.com/kast-spells/librarian.git
