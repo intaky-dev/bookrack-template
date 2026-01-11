@@ -1,0 +1,91 @@
+# Covenant Book - FWCorp Identity & Access Management
+# This book manages authentication, authorization, and identity for FWCorp cluster
+
+name: covenant-fwcorp
+description: "FWCorp - Production Covenant for Identity & Access Management"
+
+# Repository where covenant chart lives
+repository: https://github.com/kast-spells/kast-system.git
+path: ./covenant
+revision: main
+
+# Keycloak Realm Configuration
+realm:
+  name: fwcorp
+  displayName: "FWCorp"
+  keycloakRef: keycloak
+  emailDomain: fwcorp.io  # Domain for auto-generated usernames and emails
+
+  # Password Policy
+  # Enforces strong passwords for all users
+  passwordPolicy:
+    - type: length
+      value: "12"
+    - type: upperCase
+      value: "1"
+    - type: lowerCase
+      value: "1"
+    - type: digits
+      value: "1"
+    - type: specialChars
+      value: "1"
+    - type: notUsername
+      value: ""
+    - type: passwordHistory
+      value: "3"
+
+  # Token Settings
+  # Controls session lifetimes and token expiration
+  tokenSettings:
+    accessTokenLifespan: 900        # 15 minutes
+    ssoSessionIdleTimeout: 1800     # 30 minutes
+    ssoSessionMaxLifespan: 36000    # 10 hours
+    offlineSessionIdleTimeout: 2592000  # 30 days
+
+  # Themes
+  themes:
+    loginTheme: keycloak
+    accountTheme: keycloak
+    adminTheme: keycloak
+    emailTheme: keycloak
+
+  # Event Configuration
+  # Enables audit logging for security and compliance
+  eventConfig:
+    eventsEnabled: true
+    eventsExpiration: 604800  # 7 days
+    eventsListeners:
+      - jboss-logging
+    adminEventsEnabled: true
+    adminEventsDetailsEnabled: true
+
+# Global Realm Roles
+# These roles are available across all chapters/applications
+roles:
+  # Base user role for all authenticated users
+  user:
+    description: "Base user role for all authenticated members"
+    composite: false
+
+  # Global read-only access across all applications
+  readonly:
+    description: "Read-only access to all integrated applications"
+    composite: false
+
+  # Global full access across all applications
+  full:
+    description: "Full administrative access to all integrated applications"
+    composite: false
+
+  # Organization administrator (composite of full + user)
+  org-admin:
+    description: "Organization administrator with elevated privileges"
+    composite: true
+    compositeRoles:
+      - full
+      - user
+
+  # Security/compliance role
+  security-admin:
+    description: "Security administrator with access to audit logs and compliance tools"
+    composite: false

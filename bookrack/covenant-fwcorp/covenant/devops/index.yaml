@@ -1,0 +1,35 @@
+name: devops
+description: "DevOps Team - CI/CD, automation, and infrastructure as code"
+
+# Chapter-specific roles
+roles:
+  # DevOps lead with full automation access
+  devops-lead:
+    description: "DevOps lead with full CI/CD, pipeline, and automation management access"
+    composite: false
+
+  # DevOps engineer with automation and deployment
+  devops-engineer:
+    description: "DevOps engineer with CI/CD, pipeline creation, and deployment automation access"
+    composite: false
+
+  # Automation engineer focused on tooling
+  automation-engineer:
+    description: "Automation engineer with access to automation tools, scripts, and workflows"
+    composite: false
+
+  # Pipeline viewer
+  pipeline-viewer:
+    description: "Read-only access to CI/CD pipelines and deployment history"
+    composite: false
+
+# Member defaults for all users in this chapter
+memberDefaults:
+  status: active
+  emailVerified: true
+  realmRoles:
+    - user  # All DevOps members get base user role
+
+# Chapter-level realm roles assigned to the devops group
+realmRoles:
+  - user

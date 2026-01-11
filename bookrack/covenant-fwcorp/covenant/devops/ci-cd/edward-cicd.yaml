@@ -1,0 +1,12 @@
+firstName: Edward
+lastName: Pipeline
+status: active
+emailVerified: true
+
+# Roles specific to this user
+realmRoles:
+  - devops-engineer
+  - user
+
+# Groups (auto-assigned: devops/ci-cd, devops)
+# This user will have DevOps engineer access for CI/CD pipelines

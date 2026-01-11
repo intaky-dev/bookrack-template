@@ -1,0 +1,13 @@
+firstName: Diana
+lastName: Frontend
+status: active
+emailVerified: true
+
+# Roles specific to this user
+realmRoles:
+  - senior-developer
+  - code-reviewer
+  - user
+
+# Groups (auto-assigned: developers/frontend, developers)
+# This user will have senior developer access with code review privileges

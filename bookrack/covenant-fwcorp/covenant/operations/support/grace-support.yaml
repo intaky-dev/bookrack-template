@@ -1,0 +1,12 @@
+firstName: Grace
+lastName: Support
+status: active
+emailVerified: true
+
+# Roles specific to this user
+realmRoles:
+  - support-engineer
+  - user
+
+# Groups (auto-assigned: operations/support, operations)
+# This user will have support engineer access for user assistance

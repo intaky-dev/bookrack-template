@@ -1,0 +1,35 @@
+name: developers
+description: "Development Team - Application development and testing"
+
+# Chapter-specific roles
+roles:
+  # Senior developer with elevated privileges
+  senior-developer:
+    description: "Senior developer with access to production deployments and architecture decisions"
+    composite: false
+
+  # Developer with standard access
+  developer:
+    description: "Developer with access to git, CI/CD, harbor, staging, and dev environments"
+    composite: false
+
+  # Junior developer with limited access
+  junior-developer:
+    description: "Junior developer with access to dev environments and learning resources"
+    composite: false
+
+  # Code reviewer
+  code-reviewer:
+    description: "Code reviewer with access to review and approve pull requests"
+    composite: false
+
+# Member defaults for all users in this chapter
+memberDefaults:
+  status: active
+  emailVerified: true
+  realmRoles:
+    - user  # All developer members get base user role
+
+# Chapter-level realm roles assigned to the developers group
+realmRoles:
+  - user

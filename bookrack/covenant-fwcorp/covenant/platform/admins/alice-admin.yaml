@@ -1,0 +1,13 @@
+firstName: Alice
+lastName: Admin
+status: active
+emailVerified: true
+
+# Roles specific to this user
+realmRoles:
+  - platform-admin
+  - user
+  - full
+
+# Groups (auto-assigned: platform/admins, platform)
+# This user will have full administrative access to platform infrastructure

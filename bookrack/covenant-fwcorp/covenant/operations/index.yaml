@@ -1,0 +1,40 @@
+name: operations
+description: "Operations Team - Monitoring, support, and incident management"
+
+# Chapter-specific roles
+roles:
+  # Operations manager with elevated privileges
+  ops-manager:
+    description: "Operations manager with access to all monitoring, support, and operational tools"
+    composite: false
+
+  # Operations engineer with system monitoring
+  ops-engineer:
+    description: "Operations engineer with monitoring, alerting, and incident response access"
+    composite: false
+
+  # Support engineer with user-facing tools
+  support-engineer:
+    description: "Support engineer with access to user support tools, tickets, and documentation"
+    composite: false
+
+  # On-call engineer
+  on-call:
+    description: "On-call engineer with incident response and escalation access"
+    composite: false
+
+  # Monitoring viewer
+  monitoring-viewer:
+    description: "Read-only access to monitoring dashboards and logs"
+    composite: false
+
+# Member defaults for all users in this chapter
+memberDefaults:
+  status: active
+  emailVerified: true
+  realmRoles:
+    - user  # All operations members get base user role
+
+# Chapter-level realm roles assigned to the operations group
+realmRoles:
+  - user

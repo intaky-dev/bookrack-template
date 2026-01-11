@@ -1,0 +1,12 @@
+firstName: Charlie
+lastName: Backend
+status: active
+emailVerified: true
+
+# Roles specific to this user
+realmRoles:
+  - developer
+  - user
+
+# Groups (auto-assigned: developers/backend, developers)
+# This user will have developer access with focus on backend services

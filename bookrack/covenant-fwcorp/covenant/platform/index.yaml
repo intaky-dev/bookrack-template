@@ -1,0 +1,35 @@
+name: platform
+description: "Platform Engineering - Infrastructure and Kubernetes management"
+
+# Chapter-specific roles
+roles:
+  # Platform administrator with full infrastructure access
+  platform-admin:
+    description: "Platform administrator with full K8s, infrastructure, and cluster management access"
+    composite: false
+
+  # Platform engineer with infrastructure management
+  platform-engineer:
+    description: "Platform engineer with infrastructure provisioning and K8s access"
+    composite: false
+
+  # SRE with operational access
+  sre:
+    description: "Site Reliability Engineer with monitoring, scaling, and incident response access"
+    composite: false
+
+  # Infrastructure viewer
+  infra-viewer:
+    description: "Read-only access to infrastructure and platform resources"
+    composite: false
+
+# Member defaults for all users in this chapter
+memberDefaults:
+  status: active
+  emailVerified: true
+  realmRoles:
+    - user  # All platform members get base user role
+
+# Chapter-level realm roles assigned to the platform group
+realmRoles:
+  - user

@@ -1,0 +1,13 @@
+firstName: Henry
+lastName: Monitor
+status: active
+emailVerified: true
+
+# Roles specific to this user
+realmRoles:
+  - ops-engineer
+  - on-call
+  - user
+
+# Groups (auto-assigned: operations/monitoring, operations)
+# This user will have ops engineer access with on-call responsibilities

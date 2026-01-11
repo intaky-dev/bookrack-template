@@ -1,0 +1,13 @@
+firstName: Frank
+lastName: Infrastructure
+status: active
+emailVerified: true
+
+# Roles specific to this user
+realmRoles:
+  - devops-lead
+  - automation-engineer
+  - user
+
+# Groups (auto-assigned: devops/infrastructure, devops)
+# This user will have DevOps lead access for infrastructure as code

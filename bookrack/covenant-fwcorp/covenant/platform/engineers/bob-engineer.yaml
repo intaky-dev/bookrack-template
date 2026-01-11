@@ -1,0 +1,12 @@
+firstName: Bob
+lastName: Engineer
+status: active
+emailVerified: true
+
+# Roles specific to this user
+realmRoles:
+  - platform-engineer
+  - user
+
+# Groups (auto-assigned: platform/engineers, platform)
+# This user will have platform engineering access for infrastructure provisioning
